@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smoke Slider</title>
+<style>
+.slider {
+  --line-background: rgba(255, 255, 255, 0.6);
+  --line-active: #fff;
+  --handle-background: #275EFE;
+  --handle-border: #fff;
+  --handle-text-color: #fff;
+  --smoke-background: #fff;
+  --smoke-shadow: inset 3px 3px 0 0 #E1E6F9;
+  max-width: 320px;
+  width: 100%;
+}
+.slider .rangeslider {
+  width: 100%;
+  height: 3px;
+  position: relative;
+}
+.slider .rangeslider .rangeslider__fill__bg,
+.slider .rangeslider .rangeslider__fill {
+  --b: var(--line-active);
+  position: absolute;
+  left: 0;
+  z-index: 1;
+  top: var(--t, 0);
+  height: var(--h, 3px);
+  background: var(--b);
+  border-radius: 2px;
+}
+.slider .rangeslider .rangeslider__fill__bg {
+  --t: 1px;
+  --h: 1px;
+  --b: var(--line-background);
+  width: 100%;
+}
+.slider .rangeslider .rangeslider__handle {
+  width: 33px;
+  height: 33px;
+  left: 0;
+  top: 2px;
+  z-index: 2;
+  position: absolute;
+  cursor: pointer;
+}
+.slider .rangeslider .rangeslider__handle:before {
+  content: attr(data-value);
+  top: 6px;
+  left: -8px;
+  right: -8px;
+  position: absolute;
+  text-align: center;
+  font-family: inherit;
+  -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 21px;
+  color: var(--handle-text-color);
+  -webkit-transition: -webkit-transform .3s ease;
+  transition: -webkit-transform .3s ease;
+  transition: transform .3s ease;
+  transition: transform .3s ease, -webkit-transform .3s ease;
+  -webkit-transform: translateY(var(--y, 0)) scale(var(--s, 0.7));
+          transform: translateY(var(--y, 0)) scale(var(--s, 0.7));
+}
+.slider .rangeslider .rangeslider__handle:after {
+  content: '';
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: block;
+  border: 3px solid var(--handle-border);
+  background: var(--handle-background);
+}
+.slider .rangeslider .rangeslider__handle:active, .slider .rangeslider .rangeslider__handle.active {
+  --s: 1;
+  --y: 44px;
+}
+.slider .rangeslider .smoke {
+  background: var(--smoke-background);
+  box-shadow: var(--smoke-shadow);
+  position: absolute;
+  overflow: hidden;
+  pointer-events: none;
+  left: -4px;
+  top: 0;
+  width: 41px;
+  height: 41px;
+  border-radius: 50%;
+  -webkit-transform: scale(0);
+          transform: scale(0);
+}
+
+html {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: inherit;
+}
+*:before, *:after {
+  box-sizing: inherit;
+}
+
+body {
+  min-height: 90vh;
+  font-family: 'Roboto', Arial;
+  display: -webkit-box;
+  display: flex;
+  -webkit-box-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+          align-items: center;
+  background: #275EFE;
+  font-family: 'Roboto', Arial, sans-serif;
+}
+
+</style>    
+</head>
+<body>
+    <div class="slider">
+        <input type="range" min="1" max="100" value="50">
+    </div>
+<script src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/16327/gsap-latest-beta.min.js"></script>    
+<script src="https://cdn.jsdelivr.net/npm/rangeslider-js@3.2.5/dist/rangeslider-js.min.js"></script>
+<script>
+    const $ = (s, o = document) => o.querySelector(s);
+
+var interval;
+
+let slider = $('.slider'),
+    input = $('input', slider),
+    random = (min, max) => min + Math.random() * (max - min),
+    between = (min, max, percent) =>  max - (max - min) * (1 - percent),
+    create = slider => {
+
+        let percent = slider.handle.dataset.percent,
+            position = slider.handle.dataset.position,
+            div = document.createElement('div');
+
+        div.classList.add('smoke');
+        slider.range.appendChild(div);
+
+        gsap.set(div, {
+            x: position,
+            y: -20
+        });
+
+        gsap.timeline().to(div, {
+            scale: random(between(.15, 1, percent), between(.4, 2, percent)),
+            duration: between(.8, 1.2, percent)
+        }).to(div, {
+            scale: 0,
+            duration: between(.3, .5, percent)
+        });
+
+        gsap.to(div, {
+            duration: between(.3, .4, percent),
+            opacity: 1
+        });
+
+        gsap.to(div, {
+            duration: between(2, 3, percent),
+            y: random(between(-40, -200, percent), between(-70, -320, percent)),
+            x: random(between(-20, -90, percent), between(20, 90, percent)) + parseInt(position),
+            onComplete() {
+                div.remove();
+            }
+        });
+
+    };
+
+rangesliderJs.create(input, {
+    onInit(value) {
+        this.handle.dataset.value = value;
+    },
+    onSlideStart(value, percent, position) {
+        this.handle.classList.add('active');
+        interval = setInterval(() => {
+            create(this);
+        }, 50);
+    },
+    onSlide(value, percent, position) {
+        this.handle.dataset.value = value;
+        this.handle.dataset.percent = percent;
+        this.handle.dataset.position = position;
+    },
+    onSlideEnd() {
+        this.handle.classList.remove('active');
+        clearInterval(interval);
+    }
+});
+
+</script>
+</body>
+</html>

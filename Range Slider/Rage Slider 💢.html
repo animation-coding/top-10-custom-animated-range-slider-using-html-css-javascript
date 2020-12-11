@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rage Slider</title>
+<style>
+* {
+	border: 0;
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+:root {
+	--bg: #d8d8d8;
+	--fg: #171717;
+	--fgT: #17171700;
+	--rageLight: #f13d17;
+	--rageDark: #962417;
+	--track: #969696;
+	--animDur: 0.2s;
+	--transDur: 0.1s;
+	font-size: calc(32px + (48 - 32)*(100vw - 320px)/(2560 - 320));
+}
+body, input {
+	color: var(--fg);
+	font: 1em/1.5 "Oswald", sans-serif;
+}
+body {
+	background: var(--bg);
+	display: flex;
+	height: 100vh;
+}
+form {
+	margin: auto;
+	width: 8.5em;
+}
+.rage {
+	position: relative;
+}
+.rage__input, .rage__track, .rage__flame-area {
+	width: 100%;
+}
+.rage__input {
+	background: transparent;
+	display: block;
+	outline: transparent;
+	margin: 2.25em 0;
+	height: 0.75em;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+}
+.rage__input::-webkit-slider-thumb {
+	background: transparent;
+	border: 0;
+	border-radius: 50%;
+	cursor: pointer;
+	width: 1.5em;
+	height: 1.5em;
+	-webkit-appearance: none;
+	appearance: none;
+}
+.rage__input::-moz-range-thumb {
+	background: transparent;
+	border: 0;
+	border-radius: 50%;
+	cursor: pointer;
+	width: 1.5em;
+	height: 1.5em;
+}
+.rage__input::-moz-focus-outer {
+	border: 0;
+}
+
+/* .rage__input--active is for keyboard interaction */
+.rage__input:active + .rage__track,
+.rage__input--active + .rage__track {
+	background: var(--rageDark);
+}
+.rage__input:active ~ .rage__face,
+.rage__input--active ~ .rage__face,
+.rage__input:active ~ .rage__face:after,
+.rage__input--active ~ .rage__face:after {
+	background: var(--rageLight);
+}
+.rage__input:active ~ .rage__face:before,
+.rage__input--active ~ .rage__face:before {
+	animation: pulse var(--animDur) var(--transDur) linear infinite;
+	transform: scale(1);
+}
+.rage__input:active ~ .rage__face:after,
+.rage__input--active ~ .rage__face:after {
+	transform: scaleY(1);
+}
+.rage__input:active ~ .rage__face .rage__face-mouth,
+.rage__input--active ~ .rage__face .rage__face-mouth {
+	transform: scaleY(-1);
+}
+.rage__track, .rage__flame-area, .rage__face, .rage__face:before, .rage__face:after, .rage__value {
+	position: absolute;
+}
+.rage__track, .rage__flame-area, .rage__face {
+	left: 0;
+}
+.rage__track, .rage__face {
+	transition: background var(--transDur) linear;
+}
+.rage__track, .rage__face:before, .rage__face:after {
+	content: "";
+	display: block;
+}
+.rage__track {
+	background: var(--track);
+	border-radius: 0.75em;
+	top: 0;
+	height: 0.75em;
+	z-index: -3;
+}
+.rage__flame-area {
+	bottom: -0.375em;
+	width: 100%;
+	height: 3em;
+	z-index: -2;
+}
+.rage__face, .rage__face:before {
+	border-radius: 50%;
+}
+.rage__face {
+	background: #fff;
+	box-shadow: 0 0 0 0.1em #0003 inset;
+	display: flex;
+	justify-content: center;
+	align-content: center;
+	flex-wrap: wrap;
+	top: -0.375em;
+	width: 1.5em;
+	height: 1.5em;
+	will-change: transform;
+	z-index: -1;
+}
+.rage__face:before, .rage__face-mouth {
+	transition: transform var(--transDur) linear;
+}
+.rage__face:before {
+	background-image:
+		radial-gradient(100% 100% at 50% 0,var(--fgT) 16%,var(--fg) 18% 31%,var(--fgT) 33%),
+		radial-gradient(100% 100% at 100% 50%,var(--fgT) 16%,var(--fg) 18% 31%,var(--fgT) 33%),
+		radial-gradient(100% 100% at 50% 100%,var(--fgT) 16%,var(--fg) 18% 31%,var(--fgT) 33%),
+		radial-gradient(100% 100% at 0 50%,var(--fgT) 16%,var(--fg) 18% 31%,var(--fgT) 33%);
+	top: -0.2em;
+	right: -0.2em;
+	width: 0.6em;
+	height: 0.6em;
+	transform: scale(0);
+}
+.rage__face:after {
+	background: #f1f1f1;
+	clip-path: polygon(0 0,100% 0,50% 100%);
+	-webkit-clip-path: polygon(0 0,100% 0,50% 100%);
+	top: 0.3em;
+	left: calc(50% - 0.4em);
+	width: 0.8em;
+	height: 0.4em;
+	transition: background var(--transDur) linear, transform var(--transDur) linear;
+	transform: scaleY(0);
+	transform-origin: 50% 0;
+}
+.rage__face-eye {
+	background: #171717;
+	border-radius: 50%;
+	margin: 0 0.125em 0.2em;
+	width: 0.2em;
+	height: 0.4em;
+}
+.rage__face-mouth {
+	border-radius: 0 0 50% 50% / 0 0 100% 100%;
+	box-shadow: 0 -0.1em 0 #171717 inset;
+	width: 0.75em;
+	height: 0.25em;
+}
+.rage__value {
+	top: 100%;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--bg: #242424;
+		--fg: #f1f1f1;
+		--fgT: #f1f1f100;
+		--track: #575757;
+	}
+}
+
+@keyframes pulse {
+	from, to { transform: scale(1); }
+	50% { transform: scale(1.25); }
+}    
+</style>    
+</head>
+<body>
+    <form>
+        <div class="rage" id="rageslider1">
+            <input class="rage__input" type="range" name="rage" value="0" min="0" max="20">
+            <div class="rage__track"></div>
+            <canvas class="rage__flame-area"></canvas>
+            <div class="rage__face">
+                <div class="rage__face-eye"></div>
+                <div class="rage__face-eye"></div>
+                <div class="rage__face-mouth"></div>
+                <div class="rage__value">0</div>
+            </div>
+        </div>
+    </form> 
+
+<script>
+window.addEventListener("DOMContentLoaded",() => {
+	let rageslider1 = new RageSlider({id: "rageslider1"});
+});
+
+class RageSlider {
+	constructor(args) {
+		let el = document.querySelector(`#${args.id}`),
+			isMobile = "ontouchstart" in document.documentElement,
+			clientDownEvent = isMobile ? "touchstart" : "mousedown",
+			clientUpEvent = isMobile ? "touchend" : "mouseup";
+
+		this.track = el.querySelector(".rage__input");
+		this.flameArea = el.querySelector(".rage__flame-area");
+		this.flameAreaContext = this.flameArea.getContext("2d");
+		this.flameAreaScale = 2;
+		this.face = el.querySelector(".rage__face");
+		this.value = el.querySelector(".rage__value");
+		this.kbdActiveClass = "rage__input--active";
+
+		this.isBurning = false;
+		this.maxParticles = 32;
+		this.particle = () => ({
+			x: this.randomX(),
+			y: this.flameArea.height / this.flameAreaScale - this.getHandleHeight() / 2,
+			rStart: this.getHandleHeight() / 3,
+			speed: this.getHandleHeight() / 10
+		});
+		this.particles = [];
+
+		// assign listeners
+		window.addEventListener("resize",() => {
+			this.adjustCanvas();
+		});
+		this.track.addEventListener(clientDownEvent,e => {
+			if (e.which !== 3) {
+				this.isBurning = true;
+				this.startFlame();
+			}
+		});
+		this.track.addEventListener(clientUpEvent,() => {
+			this.isBurning = false;
+		});
+		this.track.addEventListener("keydown",e => {
+			let kc = e.keyCode;
+			if (kc >= 37 && kc <= 40) {
+				this.isBurning = true;
+				this.startFlame();
+				this.track.classList.add(this.kbdActiveClass);
+			}
+		});
+		this.track.addEventListener("keyup",() => {
+			this.isBurning = false;
+			this.track.classList.remove(this.kbdActiveClass);
+		});
+		this.track.addEventListener("input",() => {
+			this.updateFacePos();
+		});
+
+		// initiate
+		this.adjustCanvas();
+		this.updateFacePos();
+	}
+	adjustCanvas() {
+		let S = this.flameAreaScale,
+			OW = this.flameArea.offsetWidth,
+			OH = this.flameArea.offsetHeight;
+		// use natural canvas dimensions affected by ems
+		this.flameArea.width = OW * S;
+		this.flameArea.height = OH * S;
+		this.flameArea.style.width = OW + "px";
+		this.flameArea.style.height = OH + "px";
+		this.flameAreaContext.scale(S,S);
+	}
+	getHandleHeight() {
+		let CS = window.getComputedStyle(this.face),
+			height = CS.getPropertyValue("height"),
+			heightNoPx = parseFloat(height.split("px")[0]);
+
+		return heightNoPx;
+	}
+	getRangePercent() {
+		let max = this.track.max,
+			min = this.track.min,
+			relativeValue = this.track.value - min,
+			ticks = max - min,
+			percent = relativeValue / ticks;
+
+		return percent;
+	}
+	randomX() {
+		let handleSize = this.getHandleHeight(),
+			handleRad = handleSize/2,
+			// get the current handle position
+			xLimit = this.flameArea.width / this.flameAreaScale - handleSize,
+			placeX = handleRad + (this.getRangePercent() * xLimit),
+			// randomly adjust between the handle center and edge
+			flip = Math.random() < 0.5 ? -1 : 1,
+			displace = Math.random() * (handleRad - handleSize/3) * flip,
+			x = placeX + displace;
+
+		return x;
+	}
+	startFlame() {
+		if (!this.particles.length)
+			this.updateFlame();
+	}
+	updateFlame() {
+		let c = this.flameAreaContext,
+			S = this.flameAreaScale,
+			W = this.flameArea.width / S,
+			H = this.flameArea.height / S,
+			faceCenter = H - this.getHandleHeight()/2;
+
+		c.clearRect(0,0,W,H);
+
+		// supply particles
+		if (this.particles.length < this.maxParticles && this.isBurning)
+			this.particles.push(this.particle());
+
+		// particle ascension
+		for (let p of this.particles) {
+			let faceCenterToTopPct = p.y / faceCenter,
+				pRadius = p.rStart * faceCenterToTopPct;
+
+			p.y -= p.speed;
+
+			if (p.y <= 0) {
+				// particles shouldn’t regenerate if the user stops interacting
+				if (this.isBurning) {
+					p.x = this.randomX();
+					p.y = faceCenter;
+
+				} else {
+					this.particles.shift();
+				}
+
+			} else {
+				// draw the particle
+				let hue = 50 * faceCenterToTopPct;
+				c.fillStyle = `hsl(${hue},90%,50%)`;
+				c.beginPath();
+				c.arc(p.x,p.y,pRadius,0,2*Math.PI);
+				c.fill();
+				c.closePath();
+			}
+		}
+
+		requestAnimationFrame(() => {
+			if (this.particles.length)
+				this.updateFlame();
+		});
+	}
+	updateFacePos() {
+		let percent = this.getRangePercent(),
+			left = percent * 100,
+			emAdjust = percent * 1.5;
+
+		this.face.style.left = `calc(${left}% - ${emAdjust}em)`;
+		this.value.innerHTML = this.track.value;
+	}
+}    
+</script>
+
+</body>
+</html>

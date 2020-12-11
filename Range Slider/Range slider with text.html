@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Range slider with text</title>
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Monoton&display=swap");
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+main {
+  display: -webkit-box;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+          flex-flow: column nowrap;
+  -webkit-box-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+          align-items: center;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(to right, #fc00ff, #00dbde);
+}
+.fill-area {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #333838;
+  box-shadow: inset 3px 3px 5px -1px #111;
+  pointer-events: none;
+}
+label {
+  position: static;
+  z-index: 1;
+  font: 8rem  sans-serif;
+  color: #fff;
+  margin: -5rem 0 2rem;
+}
+label::after {
+  content: "%";
+}
+input[type=range] {
+  position: static;
+  z-index: 2;
+  width: 50vw;
+  height: 1rem;
+  background: rgba(255, 255, 255, 0.8);
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  border: none;
+  outline: none;
+  border-radius: 100vmax;
+  box-shadow: inset 3px 3px 5px -1px #000;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+          appearance: none;
+  width: 4vw;
+  height: 4vw;
+  background: #eee;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 5px 5px 8px -1px #000;
+  -webkit-transition: box-shadow 0.3s ease-in-out;
+  transition: box-shadow 0.3s ease-in-out;
+}
+input[type=range]:hover::-webkit-slider-thumb {
+  background: #fff;
+  box-shadow: 3px 3px 5px -1px #000;
+}
+input[type=range]::-ms-track {
+  width: 100%;
+  background: transparent;
+  border-color: transparent;
+  color: transparent;
+}
+@media screen and (max-width: 532px) {
+  label {
+    font-size: 24vw;
+  }
+}
+    
+</style>
+</head>
+<body>
+
+<main>
+  <div class="fill-area"></div>
+  <label id="range-value" for="range">0</label>
+  <input id="range" type="range" name="range" value="0" min="0" max="100" onmousemove="handleMouseMove(this.value)" onchange="handleMouseMove(this.value)"/>
+</main>
+
+<script>
+function handleMouseMove(value) {
+  const rangeValueElement = document.querySelector("#range-value")
+  const inputElement = document.querySelector('input[type="range"]')
+  const fillAreaElement = document.querySelector(".fill-area")
+  
+  const hueRotate = "hue-rotate(" + value + "deg)"
+  
+  rangeValueElement.textContent = value
+  rangeValueElement.style.filter = hueRotate
+  
+  inputElement.style.filter = hueRotate
+  
+  fillAreaElement.style.left = value + "vw"
+  fillAreaElement.style.width = (100-value) + "vw"
+  fillAreaElement.style.filter = hueRotate
+}
+
+
+</script>
+</body>
+</html>
